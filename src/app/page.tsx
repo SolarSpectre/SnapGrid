@@ -1,5 +1,5 @@
-import Link from "next/link";
 import db from "../server/db/index.ts";
+export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const posts = await db.query.posts.findMany();
   const mockUrls = [
