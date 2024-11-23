@@ -5,7 +5,6 @@ import { images } from "~/server/db/schema";
 import db from "~/server/db";
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
