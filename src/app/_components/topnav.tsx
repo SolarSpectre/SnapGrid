@@ -14,7 +14,7 @@ export default function TopNav() {
         <SignedIn>
           <UploadButton
         endpoint="imageUploader"
-        onClientUploadComplete={(res) => {
+        onClientUploadComplete={() => {
           router.refresh()
         }}
         onUploadError={(error: Error) => {
