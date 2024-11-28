@@ -1,8 +1,14 @@
-"use client";
+import FullPageImage from "~/app/components/full-image-page";
 
-import * as React from "react";
-
-export default function PhotoModal({ params }: { params: { id: string } }) {
-  const { id: photoId } = React.use(params);
-  return <div>{photoId}</div>;
+type Params = Promise<{ id: string }>
+export default async function PhotoPage({
+  params,
+}: {
+  params: Params;
+}) {
+  const { id: photoId } = await params;
+  const idAsNumber = Number(photoId);
+  if (Number.isNaN(idAsNumber)) throw new Error("Invalid photo id");
+  return <FullPageImage id={idAsNumber}/>
 }
+
