@@ -1,9 +1,10 @@
-import { clerkClient } from "@clerk/nextjs/server";
+import { currentUser } from '@clerk/nextjs/server'
 import { getImage } from "~/server/queries";
 
 export default async function FullPageImage(props: { id: number }) {
   const image = await getImage(props.id);
-  const uploaderInfo =  await clerkClient.users.getUser(image.userId);
+  const uploaderInfo =  await currentUser();
+  if (!uploaderInfo) return <div>Not signed in</div>
   return (
     <div className="flex h-full w-full min-w-0">
       <div className="flex-shrink flex items-center justify-center">
@@ -17,7 +18,7 @@ export default async function FullPageImage(props: { id: number }) {
         <div className="text-lg border-b text-center p-2">{image.name}</div>
         <div className="flex flex-col p-2">
           <span>Upload By: </span>
-          <span>{uploaderInfo.fullName}</span>
+          <span>{`${uploaderInfo?.firstName} ${uploaderInfo?.lastName}`}</span>
         </div>
         <div className="flex flex-col p-2">
           <span>Created On: </span>
