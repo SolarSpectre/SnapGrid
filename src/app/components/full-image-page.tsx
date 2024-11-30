@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { currentUser } from '@clerk/nextjs/server'
 import { getImage } from "~/server/queries";
 
