@@ -9,6 +9,7 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import { ourFileRouter } from "./api/uploadthing/core";
 import { Toaster } from "~/components/ui/sonner";
+import { CSPostHogProvider } from "./_analytics/provider";
 
 export const metadata: Metadata = {
   title: "T3 Gallery",
@@ -24,6 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
+      <CSPostHogProvider>
       <html lang="en" className={`${GeistSans.variable} font-sans dark`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <body>
@@ -36,6 +38,7 @@ export default function RootLayout({
           <Toaster />
         </body>
       </html>
+      </CSPostHogProvider>
     </ClerkProvider>
   );
 }
