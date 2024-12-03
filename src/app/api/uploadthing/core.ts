@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/only-throw-error */
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { db } from "~/server/db";
@@ -14,8 +14,12 @@ export const ourFileRouter = {
       const user = await auth();
       if (!user.userId) throw new UploadThingError("Unauthorized");
 
-      const { success } = await ratelimit.limit(user.userId)
-      if(!success) throw new UploadThingError("RateLimited")
+      const fullUserData = await currentUser();
+      if (fullUserData?.privateMetadata?.["can-upload"] !== true)
+        throw new UploadThingError("User does not have upload permissions");
+
+      const { success } = await ratelimit.limit(user.userId);
+      if (!success) throw new UploadThingError("RateLimited");
 
       return { userId: user.userId };
     })
