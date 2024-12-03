@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/only-throw-error */
 import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { db } from "~/server/db";
 import { images } from "~/server/db/schema";
+import { ratelimit } from "~/server/ratelimit";
 
 const f = createUploadthing();
 
 export const ourFileRouter = {
   imageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 40 } })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       const user = await auth();
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!user.userId) throw new UploadThingError("Unauthorized");
+
+      const { success } = await ratelimit.limit(user.userId)
+      if(!success) throw new UploadThingError("RateLimited")
 
       return { userId: user.userId };
     })
