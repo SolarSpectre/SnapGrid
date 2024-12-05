@@ -6,12 +6,19 @@ import { images } from "./db/schema";
 import { and,eq } from "drizzle-orm";
 import analyticsServerClient from "./analytics";
 
-export async function getMyImages() {
+interface GetMyImagesParams {
+  limit: number;
+  offset: number;
+}
+export async function getMyImages(params: GetMyImagesParams) {
+  const {limit,offset} = params;
   const user = await auth();
   if (!user.userId) throw new Error("Unathorized");
   const images = await db.query.images.findMany({
     where: (model, { eq }) => eq(model.userId, user.userId),
     orderBy: (model, { desc }) => desc(model.id),
+    limit,
+    offset,
   });
   return images;
 }
