@@ -60,14 +60,19 @@ function LoadMore() {
   const { ref, inView } = useInView();
   const [images, setImages] = useState<ImageType[]>([]);
   const [page, setPage] = useState(1);
+  const [hasMoreImages, setHasMoreImages] = useState(true);
 
   useEffect(() => {
     const loadMoreImages = async (): Promise<void> => {
       try {
-        if (inView) {
+        if (inView && hasMoreImages) {
           const newImages = await fetchImages(page);
-          setImages((prevImages) => [...prevImages, ...newImages]);
-          setPage((prevPage) => prevPage + 1);
+          if (newImages.length > 0) {
+            setImages((prevImages) => [...prevImages, ...newImages]);
+            setPage((prevPage) => prevPage + 1);
+          } else {
+            setHasMoreImages(false);
+          }
         }
       } catch (error) {
         console.error("Error loading images:", error);
@@ -75,16 +80,18 @@ function LoadMore() {
     };
 
     void loadMoreImages();
-  }, [inView, page]);
+  }, [inView, page, hasMoreImages]);
 
   return (
     <>
       <Images images={images} />
-      <section className="flex w-full items-center justify-center">
-        <div ref={ref}>
-          <LoadingSpinnerSVG />
-        </div>
-      </section>
+      {hasMoreImages && (
+        <section className="flex w-full items-center justify-center">
+          <div ref={ref}>
+            <LoadingSpinnerSVG />
+          </div>
+        </section>
+      )}
     </>
   );
 }
