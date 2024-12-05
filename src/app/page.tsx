@@ -40,7 +40,7 @@ const Images = async () => {
     </div>
   );
 };
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <main className="">
       <SignedOut>
