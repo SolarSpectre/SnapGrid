@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { fetchImages } from "~/server/actions/fetchImages";
 import { useInView } from "react-intersection-observer";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { MotionDiv } from "~/components/ui/MotionDiv";
 
 // Define the type for an image object
@@ -18,82 +19,86 @@ type ImageType = {
 };
 
 // Props type for Images component
-type ImagesProps = {
+type LoadMoreClientProps = {
+  initialImages: ImageType[];
+};
+
+type PaginatedResponse = {
   images: ImageType[];
+  nextPage: number | undefined;
+};
+const fetchImagesPaginated = async (
+  page: number,
+): Promise<PaginatedResponse> => {
+  const images = await fetchImages(page);
+  return {
+    images,
+    nextPage: images.length > 0 ? page + 1 : undefined,
+  };
 };
 const variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
-const Images: React.FC<ImagesProps> = ({ images }) => {
 
-  return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
-      {images.map((image,index) => (
-        <MotionDiv
-          variants={variants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: index*0.25, ease: "easeInOut", duration: 0.5 }}
-          viewport={{ amount: 0 }}
-          key={image.id}
-          className="flex h-auto w-64 flex-col overflow-hidden text-ellipsis whitespace-nowrap"
-        >
-          <Link href={`/img/${image.id}`}>
-            <Image
-              src={image.url}
-              style={{ objectFit: "cover" }}
-              width={250}
-              height={250}
-              alt={image.name}
-              className="aspect-4/5 rounded-lg"
-            />
-          </Link>
-          <p>{image.name}</p>
-        </MotionDiv>
-      ))}
-    </div>
-  );
-};
-
-function LoadMore() {
+const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
   const { ref, inView } = useInView();
-  const [images, setImages] = useState<ImageType[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMoreImages, setHasMoreImages] = useState(true);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status,error } =
+    useInfiniteQuery({
+      queryKey: ["images"],
+      queryFn: ({ pageParam = 0 }) => fetchImagesPaginated(pageParam),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage: PaginatedResponse) => lastPage.nextPage,
+      initialData: {
+        pages: [{ images: initialImages, nextPage: 1 }],
+        pageParams: [0],
+      },
+    });
 
+  const images = data?.pages.flatMap((page) => page.images) || [];
   useEffect(() => {
-    const loadMoreImages = async (): Promise<void> => {
-      try {
-        if (inView && hasMoreImages) {
-          const newImages = await fetchImages(page);
-          if (newImages.length > 0) {
-            setImages((prevImages) => [...prevImages, ...newImages]);
-            setPage((prevPage) => prevPage + 1);
-          } else {
-            setHasMoreImages(false);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading images:", error);
-      }
-    };
-
-    void loadMoreImages();
-  }, [inView, page, hasMoreImages]);
-
+    if (inView) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+const getRandomDelay = () => Math.random() * (0.5 - 0.1) + 0.1;
   return (
     <>
-      <Images images={images} />
-      {hasMoreImages && (
-        <section className="flex w-full items-center justify-center">
-          <div ref={ref}>
-            <LoadingSpinnerSVG />
-          </div>
-        </section>
+      <div className="flex flex-wrap justify-center gap-4 p-4">
+        {images.map((image, index) => (
+          <MotionDiv
+            key={image.id}
+            variants={variants}
+            initial="hidden"
+            animate="visible"
+            transition={{
+              delay: getRandomDelay(),
+              ease: "easeInOut",
+              duration: 0.3,
+            }}
+            className="flex h-auto w-64 flex-col overflow-hidden text-ellipsis whitespace-nowrap"
+          >
+            <Link href={`/img/${image.id}`}>
+              <Image
+                src={image.url}
+                style={{ objectFit: "cover" }}
+                width={192}
+                height={192}
+                alt={image.name}
+                className="aspect-4/5 rounded-lg"
+              />
+            </Link>
+            <p>{image.name}</p>
+          </MotionDiv>
+        ))}
+      </div>
+      {hasNextPage && (
+        <div ref={ref} className="flex w-full items-center justify-center p-4">
+          <LoadingSpinnerSVG />
+        </div>
       )}
     </>
   );
-}
+};
 
 export default LoadMore;
