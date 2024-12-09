@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import LoadMore from "./load-more";
+import { ImageStoreProvider } from "~/store/zustandProvider";
 export default function ClientOnly({ initialImages }: { initialImages: any }) {
   const [isClient, setIsClient] = React.useState(false);
 
@@ -16,7 +17,9 @@ export default function ClientOnly({ initialImages }: { initialImages: any }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LoadMore initialImages={initialImages} />
+      <ImageStoreProvider>
+        <LoadMore initialImages={initialImages} />
+      </ImageStoreProvider >
     </QueryClientProvider>
   );
 }
