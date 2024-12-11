@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useUploadThing } from "~/utils/uploadthing";
 import { toast } from "sonner";
 import { usePostHog } from "posthog-js/react";
-import LoadingSpinnerSVG from "~/components/ui/spinner";
+import {LoadingSpinnerSVG} from "~/components/ui/SVG";
 
 // inferred input off useUploadThing
 type Input = Parameters<typeof useUploadThing>;

@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { images } from "./db/schema";
 import { and,eq } from "drizzle-orm";
 import analyticsServerClient from "./analytics";
-
 interface GetMyImagesParams {
   limit: number;
   offset: number;
@@ -37,7 +36,6 @@ export async function getImage(id: number) {
 export async function deleteImage(id: number) {
   const user = await auth();
   if (!user.userId) throw new Error("Unauthorized");
-
   await db
     .delete(images)
     .where(and(eq(images.id, id), eq(images.userId, user.userId)));
