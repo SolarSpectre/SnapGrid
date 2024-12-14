@@ -4,13 +4,14 @@ import ClientOnly from "./_components/client";
 export const dynamic = "force-dynamic";
 
 const fetchInitialImages = async () => {
-  const initialImages = await fetchImages(0); // Fetch initial images on the server
-  return initialImages;
+  const initialImages = await fetchImages(0); 
+  return initialImages ?? [];
 };
 
 
 export default async function HomePage() {
   const initialImages = await fetchInitialImages();
+  
   return (
     <main className="">
       <SignedOut>

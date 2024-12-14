@@ -12,7 +12,11 @@ interface GetMyImagesParams {
 export async function getMyImages(params: GetMyImagesParams) {
   const {limit,offset} = params;
   const user = await auth();
-  if (!user.userId) throw new Error("Unathorized");
+
+  if (!user || !user.userId) {
+    return []
+  }
+  if(!user.userId) throw new Error("Unauthorized")
   const images = await db.query.images.findMany({
     where: (model, { eq }) => eq(model.userId, user.userId),
     orderBy: (model, { desc }) => desc(model.id),
@@ -20,6 +24,15 @@ export async function getMyImages(params: GetMyImagesParams) {
     offset,
   });
   return images;
+}
+export async function getAlbums() {
+  const user = await auth()
+  if (!user.userId) throw new Error("Unathorized");
+  const albums = await db.query.album.findMany({
+    where: (model, { eq }) => eq(model.userId, user.userId),
+    orderBy: (model, { desc }) => desc(model.id),
+  })
+  return albums
 }
 export async function getImage(id: number) {
   const user = await auth();

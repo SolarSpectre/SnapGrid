@@ -33,6 +33,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.33.0",
+    "embla-carousel": "^8.5.1",
+    "embla-carousel-react": "^8.5.1",
     "geist": "^1.3.0",
     "lucide-react": "^0.462.0",
     "motion": "^11.13.1",
