@@ -82,8 +82,9 @@ export function SimpleUploadButton() {
   });
   return (
     <div>
-      <label htmlFor="upload-button" className="cursor-pointer">
+      <label htmlFor="upload-button" className="flex cursor-pointer items-center justify-center">
         <UploadSVG />
+        <p className="text-center text-xs">Upload</p>
       </label>
       <input
         id="upload-button"
