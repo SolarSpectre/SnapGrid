@@ -5,7 +5,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Images } from "~/app/_components/images";
-import { fetchAlbumImages, fetchImages } from "~/server/actions/fetchImages";
+import { fetchAlbumImages } from "~/server/actions/albumActions";
+import { useSelectedImages } from "~/store/zustandProvider";
 
 type AlbumType = {
   id: number;
@@ -55,16 +56,17 @@ export default function PhotoAlbumPage({ album }: { album: AlbumType }) {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+ const selectedImages = useSelectedImages();
   return (
     <>
-      <h1 className="break-words text-left font-mono text-xl font-semibold">
+      <h1 className="break-words text-center font-mono text-xl font-semibold">
         {album.name}
       </h1>
-      <p className="break-words text-left font-mono text-sm font-normal">
+      <p className="break-words text-center font-mono text-sm font-normal">
         {album.description}
       </p>
       {images.length > 0 ? (
-        <Images images={images} />
+        <Images images={images} selectedImages={selectedImages} />
       ) : (
         <div className="h-full w-full text-center text-2xl">
           Add Images to the album

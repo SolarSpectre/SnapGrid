@@ -1,14 +1,14 @@
 "use client";
 import { LoadingSpinnerSVG } from "~/components/ui/SVG";
-import { fetchImages } from "~/server/actions/fetchImages";
+import { fetchImages } from "~/server/actions/imagesActions";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { EmblaOptionsType } from "embla-carousel";
 import EmblaCarousel from "./album";
-import { fetchAlbumServer } from "~/server/actions/fetchAlbums";
 import { Images } from "./images"
-import CreateAlbumDialog from "./create-album";
+import {AddImagesDialog, CreateAlbumDialog} from "./dialogs";
+import { useSelectedImages } from "~/store/zustandProvider";
+import { fetchAlbumServer } from "~/server/actions/albumActions";
 // Define the type for an image object
 type ImageType = {
   id: number;
@@ -66,6 +66,7 @@ const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
     queryKey: ["albums"],
     queryFn: fetchAlbums,
   });
+ const selectedImages = useSelectedImages();
   return (
     <>
       {initialImages.length === 0 ? (
@@ -86,10 +87,11 @@ const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
               />
               <div className="flex justify-center">
               <CreateAlbumDialog />
+              {selectedImages && <AddImagesDialog albums={albumData} selectedImages={selectedImages}/>}
               </div>
             </>
           ) : null}
-          <Images images={images} />
+          <Images albums={albumData} images={images} selectedImages={selectedImages}/>
         </>
       )}
       {hasNextPage && (

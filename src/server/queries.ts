@@ -10,10 +10,10 @@ interface GetMyImagesParams {
   offset: number;
 }
 
-interface AlbumImagesParams{
+interface AlbumImagesParams {
   limit: number;
   offset: number;
-  id:number;
+  id: number;
 }
 export async function getMyImages(params: GetMyImagesParams) {
   const { limit, offset } = params;
@@ -79,8 +79,8 @@ export async function deleteImage(id: number) {
   });
   redirect("/");
 }
-export const getAllImagesByAlbumId = async (params:AlbumImagesParams) => {
-  const { limit, offset,id } = params;
+export const getAllImagesByAlbumId = async (params: AlbumImagesParams) => {
+  const { limit, offset, id } = params;
   const user = await auth();
   if (!user.userId) throw new Error("Unauthorized");
   const albumImages = await db
@@ -99,4 +99,39 @@ export const getAllImagesByAlbumId = async (params:AlbumImagesParams) => {
     .offset(offset);
 
   return albumImages;
+};
+export const addImagesToAlbum = async (params: {
+  albumId: number;
+  imageIds: number[];
+}) => {
+  const { albumId, imageIds } = params;
+  const user = await auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+  const albumImagesToInsert = imageIds.map((imageId) => ({
+    albumId,
+    imageId,
+    userId: user.userId,
+  }));
+
+  await db.insert(albumImage).values(albumImagesToInsert);
+
+  return { message: "Images added to the album successfully" };
+};
+export const addImageToAlbum = async (params: {
+  albumId: number;
+  imageId: number;
+}) => {
+  const { albumId, imageId } = params;
+  const user = await auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+  const albumImageToInsert = {
+    albumId,
+    imageId,
+    userId: user.userId,
+  };
+  await db.insert(albumImage).values(albumImageToInsert);
+
+  return { message: "Image added to the album successfully" };
 };

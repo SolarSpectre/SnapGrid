@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, Check, Share2, Album, Trash2 } from "lucide-react";
+import { MoreHorizontal, Check, Share2, Album, Trash2, ChevronRight } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -9,16 +9,72 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { deleteImg } from "~/server/actions/deleteImage";
 import { useToggleImageSelection } from "~/store/zustandProvider";
-
-export function MoreOptionsMenu(props: { id: number }) {
-    const toggleImageSelection = useToggleImageSelection();
-    const handleSelectClick = (id: number) => {
+import { deleteImg } from "~/server/actions/imagesActions";
+import { useUser } from "@clerk/nextjs";
+import { LoadingSpinnerSVG } from "~/components/ui/SVG";
+import { addImageAlbum } from "~/server/actions/albumActions";
+import { toast } from "sonner";
+import { usePostHog } from "posthog-js/react";
+interface MenuProps {
+  albums:
+    | {
+        name: string;
+        id: number;
+        description: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date | null;
+      }[]
+    | undefined;
+  id: number;
+}
+export function MoreOptionsMenu({ albums,id }: MenuProps) {
+  const { user } = useUser();
+  const posthog = usePostHog();
+  const toggleImageSelection = useToggleImageSelection();
+  const handleSelectClick = (id: number) => {
     toggleImageSelection(id);
   };
+    const handleAddToAlbum = async (albumId: number) => {
+    if (!user?.id) {
+      toast.error("Unauthorized");
+      return;
+    }
+
+    try {
+      posthog.capture("add-begin");
+      toast(
+        <div className="flex items-center gap-2 text-white">
+          <LoadingSpinnerSVG />
+          <span className="text-lg">Adding Image...</span>
+        </div>,
+        {
+          duration: 100000,
+          id: "add-begin",
+        },
+      );
+
+      const message = await addImageAlbum({ albumId, imageId: id });
+      toast.dismiss("add-begin");
+      toast.success(message.message);
+    } catch (error: unknown) {
+      toast.dismiss("add-begin");
+      if (error instanceof Error) {
+        posthog.capture("error", { error: error.message });
+        toast.error(`Failed Adding Image: ${error.message}`);
+      } else {
+        posthog.capture("error", { error: "Unknown error" });
+        toast.error("Failed Adding Image: Unknown error");
+      }
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,8 +87,8 @@ export function MoreOptionsMenu(props: { id: number }) {
           <span className="sr-only">More options</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="end" className="w-10">
-        <DropdownMenuItem onSelect={() => handleSelectClick(props.id)}>
+      <DropdownMenuContent side="top" align="end" className="w-48">
+        <DropdownMenuItem onSelect={() => handleSelectClick(id)}>
           <Check className="h-4 w-4" />
           <span>Select</span>
         </DropdownMenuItem>
@@ -41,12 +97,24 @@ export function MoreOptionsMenu(props: { id: number }) {
           <span>Share</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Album className="h-4 w-4" />
-          <span >Save in album</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={async () => deleteImg(props.id)}>
-            <Trash2 className="h-4 w-4 text-red-600" />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Album className="h-4 w-4" />
+            <span>Save in album</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {albums?.map((album) => (
+              <DropdownMenuItem
+                key={album.id}
+                onSelect={() => handleAddToAlbum(album.id)}
+              >
+                {album.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuItem onSelect={async () => deleteImg(id)}>
+          <Trash2 className="h-4 w-4 text-red-600" />
           <span className="text-red-600">Delete</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

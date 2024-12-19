@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { fetchImages } from "~/server/actions/fetchImages";
+import { fetchImages } from "~/server/actions/imagesActions";
 import ClientOnly from "./_components/client";
 export const dynamic = "force-dynamic";
 
