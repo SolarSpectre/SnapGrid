@@ -2,21 +2,27 @@ import "server-only";
 import { db } from "./db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { images } from "./db/schema";
-import { and,eq } from "drizzle-orm";
+import { albumImage, images } from "./db/schema";
+import { and, eq } from "drizzle-orm";
 import analyticsServerClient from "./analytics";
 interface GetMyImagesParams {
   limit: number;
   offset: number;
 }
+
+interface AlbumImagesParams{
+  limit: number;
+  offset: number;
+  id:number;
+}
 export async function getMyImages(params: GetMyImagesParams) {
-  const {limit,offset} = params;
+  const { limit, offset } = params;
   const user = await auth();
 
   if (!user || !user.userId) {
-    return []
+    return [];
   }
-  if(!user.userId) throw new Error("Unauthorized")
+  if (!user.userId) throw new Error("Unauthorized");
   const images = await db.query.images.findMany({
     where: (model, { eq }) => eq(model.userId, user.userId),
     orderBy: (model, { desc }) => desc(model.id),
@@ -26,24 +32,24 @@ export async function getMyImages(params: GetMyImagesParams) {
   return images;
 }
 export async function getAlbums() {
-  const user = await auth()
+  const user = await auth();
   if (!user.userId) throw new Error("Unathorized");
   const albums = await db.query.album.findMany({
     where: (model, { eq }) => eq(model.userId, user.userId),
     orderBy: (model, { desc }) => desc(model.id),
-  })
-  return albums
+  });
+  return albums;
 }
-export async function getAlbum(id:number) {
-  const user = await auth()
+export async function getAlbum(id: number) {
+  const user = await auth();
   if (!user.userId) throw new Error("Unathorized");
   const album = await db.query.album.findFirst({
     where: (model, { eq }) => eq(model.id, id),
-  })
-  if(!album) throw new Error("Album Not Found")
-  
+  });
+  if (!album) throw new Error("Album Not Found");
+
   if (album.userId !== user.userId) throw new Error("Unauthorized");
-  return album
+  return album;
 }
 export async function getImage(id: number) {
   const user = await auth();
@@ -67,9 +73,30 @@ export async function deleteImage(id: number) {
   analyticsServerClient.capture({
     distinctId: user.userId,
     event: "delete image",
-    properties:{
-      imageId:id,
-    }
-  })
+    properties: {
+      imageId: id,
+    },
+  });
   redirect("/");
 }
+export const getAllImagesByAlbumId = async (params:AlbumImagesParams) => {
+  const { limit, offset,id } = params;
+  const user = await auth();
+  if (!user.userId) throw new Error("Unauthorized");
+  const albumImages = await db
+    .select({
+      id: images.id,
+      name: images.name,
+      url: images.url,
+      userId: images.userId,
+      createdAt: images.createdAt,
+      updatedAt: images.updatedAt,
+    })
+    .from(albumImage)
+    .innerJoin(images, eq(albumImage.imageId, images.id))
+    .where(eq(albumImage.albumId, id))
+    .limit(limit)
+    .offset(offset);
+
+  return albumImages;
+};

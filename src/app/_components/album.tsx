@@ -14,6 +14,7 @@ import {
   DotButton,
   useDotButton,
 } from "~/components/ui/embla-carousel-dot-button";
+import Autoplay from 'embla-carousel-autoplay'
 import Link from "next/link";
 
 const TWEEN_FACTOR_BASE = 0.52;
@@ -35,8 +36,8 @@ type PropType = {
 };
 
 const EmblaCarousel: React.FC<PropType> = (props) => {
-  const { slides, options, albumData } = props;
-  const [emblaRef, emblaApi] = useEmblaCarousel(options);
+  const { slides, albumData } = props;
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()]);
   const tweenFactor = useRef(0);
   const tweenNodes = useRef<HTMLElement[]>([]);
 

@@ -7,10 +7,8 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { EmblaOptionsType } from "embla-carousel";
 import EmblaCarousel from "./album";
 import { fetchAlbumServer } from "~/server/actions/fetchAlbums";
-import { Images } from "./images";
+import { Images } from "./images"
 import CreateAlbumDialog from "./create-album";
-const OPTIONS: EmblaOptionsType = { loop: true };
-
 // Define the type for an image object
 type ImageType = {
   id: number;
@@ -84,7 +82,6 @@ const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
             <>
               <EmblaCarousel
                 slides={albumData.map((_, index) => index)}
-                options={OPTIONS}
                 albumData={albumData}
               />
               <div className="flex justify-center">
