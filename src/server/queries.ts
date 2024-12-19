@@ -34,6 +34,17 @@ export async function getAlbums() {
   })
   return albums
 }
+export async function getAlbum(id:number) {
+  const user = await auth()
+  if (!user.userId) throw new Error("Unathorized");
+  const album = await db.query.album.findFirst({
+    where: (model, { eq }) => eq(model.id, id),
+  })
+  if(!album) throw new Error("Album Not Found")
+  
+  if (album.userId !== user.userId) throw new Error("Unauthorized");
+  return album
+}
 export async function getImage(id: number) {
   const user = await auth();
   if (!user.userId) throw new Error("Unathorized");

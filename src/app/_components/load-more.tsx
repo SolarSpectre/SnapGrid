@@ -4,15 +4,11 @@ import { fetchImages } from "~/server/actions/fetchImages";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { UploadDropzone } from "~/utils/uploadthing";
-import posthog from "posthog-js";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { EmblaOptionsType } from "embla-carousel";
 import EmblaCarousel from "./album";
-import { Button } from "~/components/ui/button";
 import { fetchAlbumServer } from "~/server/actions/fetchAlbums";
 import { Images } from "./images";
+import CreateAlbumDialog from "./create-album";
 const OPTIONS: EmblaOptionsType = { loop: true };
 
 // Define the type for an image object
@@ -49,7 +45,6 @@ const fetchAlbums = async () => {
   return albums;
 };
 const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
-
   const { ref, inView } = useInView();
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["images"],
@@ -69,8 +64,6 @@ const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const router = useRouter();
-
   const { data: albumData } = useQuery({
     queryKey: ["albums"],
     queryFn: fetchAlbums,
@@ -78,22 +71,28 @@ const LoadMore: React.FC<LoadMoreClientProps> = ({ initialImages }) => {
   return (
     <>
       {initialImages.length === 0 ? (
-       <div className="h-full w-full text-center text-2xl">
+        <div className="h-full w-full text-center text-2xl">
           Please Upload an image
-        </div> 
+        </div>
       ) : (
         <>
           {albumData?.length === 0 ? (
             <div className="flex flex-wrap justify-center gap-4 p-4">
-              <Button variant="default">Create Album</Button>
+              <CreateAlbumDialog />
             </div>
           ) : albumData ? (
-            <EmblaCarousel
-              slides={albumData.map((album) => album.name)}
-              options={OPTIONS}
-            />
+            <>
+              <EmblaCarousel
+                slides={albumData.map((_, index) => index)}
+                options={OPTIONS}
+                albumData={albumData}
+              />
+              <div className="flex justify-center">
+              <CreateAlbumDialog />
+              </div>
+            </>
           ) : null}
-        <Images images={images}/>
+          <Images images={images} />
         </>
       )}
       {hasNextPage && (
