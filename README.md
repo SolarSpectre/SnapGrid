@@ -23,9 +23,9 @@ To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the fo
 - [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
 
 ## TO - DO
-- [] Refactor infinite scroll with react query
-- [] Select multiple images using state management (zustand or redux)
-- [] Create albums or folders
+- [X] Refactor infinite scroll with react query
+- [X] Select multiple images using state management (zustand or redux)
+- [X] Create albums or folders
 - [] Collaborative Albums
 
 
