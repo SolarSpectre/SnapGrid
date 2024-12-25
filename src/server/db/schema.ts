@@ -21,6 +21,18 @@ import {
 export const createImgTable = pgTableCreator((name) => `gallery_${name}`);
 export const createAlbumTable = pgTableCreator((name) => `gallery_${name}`);
 
+export const users = createAlbumTable(
+  "user",
+  {
+    id: varchar("id", { length: 256 }).primaryKey(), // Clerk user ID
+    email: varchar("email", { length: 256 }).notNull(),
+    firstName: varchar("firstName", { length: 256 }),
+    lastName: varchar("lastName", { length: 256 }),
+    imageUrl: varchar("imageUrl", { length: 1024 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  }
+);
 export const images = createImgTable(
   "image",
   {
@@ -46,6 +58,10 @@ export const album = createAlbumTable(
     name: varchar("name", { length: 256 }).notNull(),
     description: varchar("description", { length: 1024 }).notNull(),
     userId: varchar("userId", { length: 256 }).notNull(),
+    colaborators: varchar("colaborators", { length: 256 })
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::varchar[]`),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -73,6 +89,32 @@ export const albumImage = pgTable(
     primaryKey: primaryKey({ columns: [table.albumId, table.imageId] }),
   }),
 );
+export const friend = createAlbumTable(
+  "friend",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    userId: varchar("userId", { length: 256 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    friendId: varchar("friendId", { length: 256 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  }
+);
+
+export const friendRelations = relations(friend, ({ one }) => ({
+  user: one(users, {
+    fields: [friend.userId],
+    references: [users.id],
+  }),
+  friendUser: one(users, {
+    fields: [friend.friendId],
+    references: [users.id],
+  }),
+}));
 export const albumRelations = relations(album, ({ many }) => ({
   images: many(albumImage),
 }));
