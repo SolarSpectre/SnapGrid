@@ -8,6 +8,7 @@ import { Images } from "~/app/_components/images";
 import { ImageType } from "~/lib/types";
 import { fetchAlbumImages } from "~/server/actions/albumActions";
 import { useSelectedImages } from "~/store/zustandProvider";
+import { CollaboratorDialog, Friend } from "../_components/dialogs";
 
 type AlbumType = {
   id: number;
@@ -31,7 +32,15 @@ const fetchImagesPaginated = async (
   };
 };
 
-export default function PhotoAlbumPage({ album }: { album: AlbumType }) {
+export default function PhotoAlbumPage({
+  album,
+  collaborators,
+  friends,
+}: {
+  album: AlbumType;
+  collaborators: string[];
+  friends: Friend[];
+}) {
   const { ref, inView } = useInView();
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["images"],
@@ -48,23 +57,39 @@ export default function PhotoAlbumPage({ album }: { album: AlbumType }) {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
- const selectedImages = useSelectedImages();
+  const selectedImages = useSelectedImages();
   return (
-    <>
-      <h1 className="break-words text-center font-mono text-xl font-semibold">
-        {album.name}
-      </h1>
-      <p className="break-words text-center font-mono text-sm font-normal">
-        {album.description}
-      </p>
-      {images.length > 0 ? (
-        <Images images={images} selectedImages={selectedImages} />
-      ) : (
-        <div className="h-full w-full text-center text-2xl">
-          Add Images to the album
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-8 space-y-6">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="flex items-center gap-4">
+            <h1 className="break-words text-center font-mono text-3xl font-bold">
+              {album.name}
+            </h1>
+            <CollaboratorDialog
+              albumId={album.id}
+              collaborators={collaborators}
+              friends={friends}
+            />
+          </div>
+
+          <p className="max-w-2xl break-words text-center font-mono text-gray-600 dark:text-gray-400">
+            {album.description}
+          </p>
+
+          <div className="h-px w-1/2 bg-gray-200 dark:bg-gray-800" />
         </div>
-      )}
-      <div ref={ref} className="h-8" />
-    </>
+
+        {images.length > 0 ? (
+          <Images images={images} selectedImages={selectedImages} />
+        ) : (
+          <div className="mt-12 flex h-64 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <p className="text-center text-xl text-gray-500 dark:text-gray-400">
+              Add Images to the album
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

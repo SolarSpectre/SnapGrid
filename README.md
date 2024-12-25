@@ -26,7 +26,7 @@ To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the fo
 - [X] Refactor infinite scroll with react query
 - [X] Select multiple images using state management (zustand or redux)
 - [X] Create albums or folders
-- [] Collaborative Albums
+- [X] Collaborative Albums
 
 
 You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!

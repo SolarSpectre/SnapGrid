@@ -3,7 +3,7 @@ import { db } from "./db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { albumImage, images } from "./db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import analyticsServerClient from "./analytics";
 interface GetMyImagesParams {
   limit: number;
@@ -33,22 +33,36 @@ export async function getMyImages(params: GetMyImagesParams) {
 }
 export async function getAlbums() {
   const user = await auth();
-  if (!user.userId) throw new Error("Unathorized");
+  if (!user.userId) throw new Error("Unauthorized");
+
   const albums = await db.query.album.findMany({
-    where: (model, { eq }) => eq(model.userId, user.userId),
-    orderBy: (model, { desc }) => desc(model.id),
+    where: (album, { or, eq }) => 
+      or(
+        eq(album.userId, user.userId),
+        sql`${user.userId} = ANY(${album.colaborators})`
+      ),
+    orderBy: (album, { desc }) => desc(album.id),
   });
+
   return albums;
 }
+
 export async function getAlbum(id: number) {
   const user = await auth();
-  if (!user.userId) throw new Error("Unathorized");
-  const album = await db.query.album.findFirst({
-    where: (model, { eq }) => eq(model.id, id),
-  });
-  if (!album) throw new Error("Album Not Found");
+  if (!user.userId) throw new Error("Unauthorized");
 
-  if (album.userId !== user.userId) throw new Error("Unauthorized");
+  const album = await db.query.album.findFirst({
+    where: (album, { and, or, eq }) => 
+      and(
+        eq(album.id, id),
+        or(
+          eq(album.userId, user.userId),
+          sql`${user.userId} = ANY(${album.colaborators})`
+        )
+      ),
+  });
+
+  if (!album) throw new Error("Album not found");
   return album;
 }
 export async function getImage(id: number) {
@@ -106,8 +120,22 @@ export const addImagesToAlbum = async (params: {
 }) => {
   const { albumId, imageIds } = params;
   const user = await auth();
-
   if (!user.userId) throw new Error("Unauthorized");
+
+  // Check if user is owner or collaborator
+  const album = await db.query.album.findFirst({
+    where: (album, { and, or, eq }) => 
+      and(
+        eq(album.id, albumId),
+        or(
+          eq(album.userId, user.userId),
+          sql`${user.userId} = ANY(${album.colaborators})`
+        )
+      ),
+  });
+
+  if (!album) throw new Error("Not authorized to add images to this album");
+
   const albumImagesToInsert = imageIds.map((imageId) => ({
     albumId,
     imageId,
@@ -115,23 +143,37 @@ export const addImagesToAlbum = async (params: {
   }));
 
   await db.insert(albumImage).values(albumImagesToInsert);
-
   return { message: "Images added to the album successfully" };
 };
+
 export const addImageToAlbum = async (params: {
   albumId: number;
   imageId: number;
 }) => {
   const { albumId, imageId } = params;
   const user = await auth();
-
   if (!user.userId) throw new Error("Unauthorized");
+
+  // Check if user is owner or collaborator
+  const album = await db.query.album.findFirst({
+    where: (album, { and, or, eq }) => 
+      and(
+        eq(album.id, albumId),
+        or(
+          eq(album.userId, user.userId),
+          sql`${user.userId} = ANY(${album.colaborators})`
+        )
+      ),
+  });
+
+  if (!album) throw new Error("Not authorized to add images to this album");
+
   const albumImageToInsert = {
     albumId,
     imageId,
     userId: user.userId,
   };
-  await db.insert(albumImage).values(albumImageToInsert);
 
+  await db.insert(albumImage).values(albumImageToInsert);
   return { message: "Image added to the album successfully" };
 };
