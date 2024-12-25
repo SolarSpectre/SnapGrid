@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Images } from "~/app/_components/images";
+import { ImageType } from "~/lib/types";
 import { fetchAlbumImages } from "~/server/actions/albumActions";
 import { useSelectedImages } from "~/store/zustandProvider";
 
@@ -12,15 +13,6 @@ type AlbumType = {
   id: number;
   name: string;
   description: string;
-};
-
-type ImageType = {
-  id: number;
-  name: string;
-  url: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
 };
 
 type PaginatedResponse = {

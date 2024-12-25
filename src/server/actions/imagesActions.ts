@@ -1,15 +1,7 @@
 "use server";
 import { getMyImages } from "~/server/queries";
 import { deleteImage } from "../queries";
-// Define the type for an image object
-type ImageType = {
-  id: number;
-  name: string;
-  url: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-};
+import { ImageType } from "~/lib/types";
 
 export const fetchImages = async (page: number): Promise<ImageType[]> => {
   const offset = page * 20;

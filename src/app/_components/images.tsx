@@ -6,21 +6,14 @@ import { CheckCircle } from "~/components/ui/SVG";
 import {
   useToggleImageSelection,
 } from "~/store/zustandProvider";
-// Define the type for an image object
-type ImageType = {
-  id: number;
-  name: string;
-  url: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-};
+import { ImageType } from "~/lib/types";
+
 
 // Props type for Images component
 type ImageProps = {
   images: ImageType[]; 
   selectedImages: Set<number>;
-  albums:
+  albums?:
     | {
         name: string;
         id: number;

@@ -8,15 +8,8 @@ import {
   getAlbums,
   getAllImagesByAlbumId,
 } from "../queries";
-// Define the type for an image object
-type ImageType = {
-  id: number;
-  name: string;
-  url: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-};
+import { ImageType } from "~/lib/types";
+
 type props = {
   name: string;
   description: string;

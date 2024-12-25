@@ -9,15 +9,7 @@ import { Images } from "./images"
 import {AddImagesDialog, CreateAlbumDialog} from "./dialogs";
 import { useSelectedImages } from "~/store/zustandProvider";
 import { fetchAlbumServer } from "~/server/actions/albumActions";
-// Define the type for an image object
-type ImageType = {
-  id: number;
-  name: string;
-  url: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-};
+import { ImageType } from "~/lib/types";
 
 // Props type for Images component
 type LoadMoreClientProps = {
