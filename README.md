@@ -1,36 +1,120 @@
-# Create T3 App
+# T3 Gallery App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A modern photo gallery application built with the T3 Stack, featuring user authentication, photo management, albums, and collaboration features.
 
-## What's next? How do I make an app with this?
+## Tech Stack
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Next.js 15 with App Router
+- TypeScript
+- Tailwind CSS
+- DrizzleORM
+- Clerk Authentication
+- UploadThing
+- PostgreSQL
+- Neon Database
+- ngrok
+- Posthog
+- Upstash
+- Sentry
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Getting Started
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### Prerequisites
 
-## Learn More
+- Node.js 18+
+- pnpm
+- PostgreSQL database (or Neon account)
+- Clerk account
+- UploadThing account
+- ngrok account
+- posthog account
+- sentry account
+- upstash account
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Environment Setup
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+1. Clone the repository
+```bash
+git clone https://github.com/SolarSpectre/SnapGrid.git
+cd SnapGrid
+pnpm install
+```
+# Create .env file
+copy .env.example .env
+### Add ALL required env variables
 
-## TO - DO
-- [X] Refactor infinite scroll with react query
-- [X] Select multiple images using state management (zustand or redux)
-- [X] Create albums or folders
-- [X] Collaborative Albums
+# Development Commands
 
+### Start dev server
+```bash
+pnpm dev
+```
+# Database commands
+```bash
+pnpm db:push      # Push changes
+pnpm db:studio    # Open Drizzle Studio
+```
+# Required Services Setup
+## Clerk Authentication
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+Sign up at clerk.dev
+Create application
+Copy API keys
+Setup OAuth (Google, GitHub)
+Add webhook endpoint: /api/webhooks/clerk
+## UploadThing
 
-## How do I deploy this?
+Register at uploadthing.com
+Create new project
+Copy API keys
+Configure upload limits
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Sentry
+
+Sign up at sentry.io
+Create application
+Copy token
+
+## Upstash 
+
+Sign up at upstash
+Create application
+Copy token & url
+
+## Posthog
+
+Sign up at posthog
+Create application
+Copy API keys
+
+## Local Webhook Development with ngrok (to add user info to db)
+
+```bash
+# Install ngrok
+pnpm add -g ngrok
+
+# Authenticate (Get token from ngrok.com)
+ngrok authtoken your_token
+
+# Start tunnel (in new terminal)
+ngrok http 3000
+```
+
+## Webhook Setup
+Copy ngrok URL (e.g., https://xxxx-xx-xx-xxx-xx.ngrok.io)
+### Clerk Dashboard:
+ - Go to Webhooks
+ - Add Endpoint: https://your-ngrok-url/api/webhooks/clerk
+ - Select Events: user.created
+ - Copy webhook secret
+### Update .env:
+```bash
+SIGNING_SECRET=
+```
+# Features
+- 📸 Photo upload and management
+- 👥 User authentication
+- 📁 Album organization
+- 🤝 Collaboration features
+- ♾️ Infinite scroll
+- 📱 Responsive design
